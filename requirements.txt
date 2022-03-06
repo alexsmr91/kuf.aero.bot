@@ -2,3 +2,4 @@ aiogram
 lxml
 bs4
 requests
+mysql-connector-python
