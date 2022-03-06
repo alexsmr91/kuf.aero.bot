@@ -106,9 +106,9 @@ async def eq_flight(dict1, dict2):
         if dict1[x] is not None:
             if dict1[x] != dict2[x]:
                 if dict1[x][5] != dict2[x][5]:
-                    await send_all(f'Поменялся статус рейса:\n{dict2[x][0]}\n{dict2[x][3]}')
+                    await send_all(f'Поменялся статус рейса:\n{dict2[x][0]}\n{dict2[x][3]}\n{dict2[x][5]}')
                 if dict1[x][6] != dict2[x][6]:
-                    await send_all(f'Поменялось время рейса:\n{dict2[x][0]}\n{dict2[x][3]}')
+                    await send_all(f'Поменялось время рейса:\n{dict2[x][0]}\n{dict2[x][3]}\n{dict2[x][5]}')
 
 
 async def main():
