@@ -1,40 +1,24 @@
 import pprint
 import requests
-import json
 import datetime
-import telebot
+from aiogram import Bot, Dispatcher, executor, types
+import bs4
+import asyncio
+import os
 
-tg_api_key = "5203110638:AAEFnrlYHl0jhs4I8N4UpMqzjMKjcfDTeYQ"
-bot = telebot.TeleBot(tg_api_key)
-
-
-def get_url_departure():
-    url_ya = "https://api.rasp.yandex.net/v3.0/schedule/?"
-    api_key = "b98c0fb3-3747-495b-b18c-027cae7c81c0"
-    station = "9600380"  # KUF Курумоч Самара
-    #time_zone = "Europe/Samara"
-    today_date = datetime.datetime.today().date()
-    return f'{url_ya}apikey={api_key}&station=s{station}&date={today_date}'#&result_timezone={time_zone}'
-
-
-def get_url_arrival():
-    return f'{get_url_departure()}&event=arrival'
+tg_api_key = os.getenv('API_KEY')
+if not tg_api_key:
+    exit("Error: no token provided")
+bot = Bot(token=tg_api_key)
+dp = Dispatcher(bot)
+url_kuf_dep = "https://kuf.aero/board/?ready=yes"
+url_kuf_arr = "https://kuf.aero/board/?type=arr&ready=yes"
+plane_status = {'вылетел', 'регистрация закончена', 'регистрация', 'задержан', 'отменен', 'прибыл', 'ожидается'}
 
 
-def schedule_parser(json_ds_response):
-    str_res = f'{datetime.datetime.today().date()}\n\n'
-    for schedule in json_ds_response['schedule']:
-        time = schedule['arrival'] or schedule['departure']
-
-        time = time[11:16]
-
-        str_res = f"{str_res}{time}\n{schedule['thread']['title']}\n\n"
-    return str_res
-
-
-def get_response(api_url: str):
+def get_response(url: str):
     try:
-        response = requests.get(api_url)
+        response = requests.get(url)
         response.raise_for_status()
     except requests.HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -44,24 +28,71 @@ def get_response(api_url: str):
         return response.text
 
 
-@bot.message_handler(content_types=['text'])
-def get_text_messages(message):
-    if message.text == "/departure":
-        bot.send_message(message.from_user.id, schedule_parser(json.loads(get_response(get_url_departure()))))
-    elif message.text == "/arrival":
-        bot.send_message(message.from_user.id, schedule_parser(json.loads(get_response(get_url_arrival()))))
-    else:
-        bot.send_message(message.from_user.id, "/departure  -  Вылеты\n\nor\n\n/arrival  -  Прилёты")
+def kuf_get_data(url):
+    text = get_response(url)
+    soup = bs4.BeautifulSoup(text, "lxml")
+    rows = soup.findAll("a", class_="table-flex__row table-flex__row--link align-center")
+    list1 = []
+    for dat in rows:
+        if dat.find('span', class_="board__text") is not None:
+            list1.append(dat.text.split('\n'))
+    return list1
 
+
+def kuf_pars(url):
+    list1 = kuf_get_data(url)
+    list2 = []
+    combi_set = set()
+    for roww in list1:
+        list_iin = []
+        for i, x in enumerate(roww):
+            if i == 19 and x.lower() not in plane_status:
+                list_iin.append('Ожидаем')
+            if x != '':
+                list_iin.append(x.strip())
+        if len(list_iin) == 9:
+            list_iin.append('')
+        combi = list_iin.pop()
+        combi_list = combi.replace('Совмещен c ', '').split(', ')
+        combi_set.update(combi_list)
+        list_iin.append(combi_list)
+        if list_iin[2] not in combi_set:
+            list2.append(list_iin)
+    return list2
+
+
+@dp.message_handler(commands="start")
+async def cmd_start(message: types.Message):
+    await message.reply("/departure  -  Вылеты\n\nor\n\n/arrival  -  Прилёты")
+
+
+@dp.message_handler(commands="departure")
+async def cmd_start(message: types.Message):
+    answer = f'{dep_list[0][1]}.{datetime.datetime.today().year}\n\n'
+    for x in dep_list:
+        answer = f'{answer}{x[0]}\n{x[4]}\n\n'
+    await message.answer(answer)
+
+
+@dp.message_handler(commands="arrival")
+async def cmd_start(message: types.Message):
+    answer = f'{arr_list[0][1]}.{datetime.datetime.today().year}\n\n'
+    for x in arr_list:
+        answer = f'{answer}{x[0]}\n{x[4]}\n\n'
+    await message.answer(answer)
+
+
+async def main():
+    global dep_list
+    global arr_list
+    while True:
+        dep_list = kuf_pars(url_kuf_dep)
+        arr_list = kuf_pars(url_kuf_arr)
+        await asyncio.sleep(3)
 
 
 if __name__ == "__main__":
-    """
-    urls = [get_url_departure(), get_url_arrival()]
-    for url in urls:
-        json_ds_response = 
-        pprint.pprint(json_ds_response)
-        #schedule_parser(json_ds_response)
-        print('_'*50)
-    """
-    bot.polling(none_stop=True, interval=0)
+    loop = asyncio.get_event_loop()
+    asyncio.ensure_future(main())
+    asyncio.ensure_future(executor.start_polling(dp, skip_updates=True))
+    loop.run_forever()
