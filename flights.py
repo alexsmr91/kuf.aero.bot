@@ -4,6 +4,8 @@
 '05:28', '07.03.2022', ['LY-8930', 'AT-9014', 'B2-180', 'KC-1438', 'A3-3540']],
 """
 from datetime import datetime
+import pytz
+tz = pytz.timezone('Europe/Samara')
 
 class Flights:
 
@@ -45,11 +47,11 @@ class Flights:
     def get_aw_date(self) -> datetime:
         st = f'{self.aw_date} {self.aw_time}'
         frm = '%d.%m.%Y %H:%M'
-        return datetime.strptime(st, frm)
+        return datetime.strptime(st, frm).astimezone(tz)
 
     def get_rl_date(self) -> datetime:
         st = f'{self.rl_date} {self.rl_time}'
         frm = '%d.%m.%Y %H:%M'
-        return datetime.strptime(st, frm)
+        return datetime.strptime(st, frm).astimezone(tz)
 
 

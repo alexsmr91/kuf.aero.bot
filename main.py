@@ -5,10 +5,12 @@ from aiogram import Bot, Dispatcher, executor, types
 import bs4
 import asyncio
 import os
+import pytz
 from database import Database
 from flights import Flights
 from functools import wraps
 
+tz = pytz.timezone('Europe/Samara')
 tg_api_key = os.getenv('API_KEY')
 admin_id = int(os.getenv('ADMIN'))
 if not tg_api_key:
@@ -182,8 +184,9 @@ async def cmd_arrival(message: types.Message):
 @get_name
 async def cmd_dep(message: types.Message):
     answer = ''
-    min_time = datetime.now() - timedelta(minutes=90)
-    max_time = datetime.now() + timedelta(minutes=180)
+
+    min_time = datetime.now().astimezone(tz) - timedelta(minutes=90)
+    max_time = datetime.now().astimezone(tz) + timedelta(minutes=180)
     for x in dep_old:
         fl_time = dep_old[x].get_rl_date()
         if min_time < fl_time < max_time:
@@ -198,8 +201,8 @@ async def cmd_dep(message: types.Message):
 @get_name
 async def cmd_arr(message: types.Message):
     answer = ''
-    min_time = datetime.now() - timedelta(minutes=90)
-    max_time = datetime.now() + timedelta(minutes=180)
+    min_time = datetime.now().astimezone(tz) - timedelta(minutes=90)
+    max_time = datetime.now().astimezone(tz) + timedelta(minutes=180)
     for x in arr_old:
         fl_time = arr_old[x].get_rl_date()
         if min_time < fl_time < max_time:
