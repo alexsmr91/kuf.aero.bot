@@ -225,6 +225,16 @@ async def cmd_users(message: types.Message):
             pass
 
 
+@dp.message_handler(commands="time")
+@get_name
+async def cmd_time(message: types.Message):
+    if message.from_user['id'] == admin_id:
+        try:
+            await message.answer(f'{datetime.now().astimezone(tz)}', reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+        except:
+            pass
+
+
 @dp.message_handler()
 async def recieve_any_text(message: types.Message):
     await cmd_start(message)
