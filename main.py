@@ -115,7 +115,6 @@ async def cmd_users(message: types.Message):
             pass
 
 
-@dp.message_handler()
 async def send_all(text: str):
     users = db.get_user_list()
     for user in users:
@@ -135,6 +134,8 @@ async def eq_flight(old_flights, new_flights):
                 await send_all(f'Поменялся статус рейса:\n{new_flights[x]}')
             elif diff == 's+rt':
                 await send_all(f'Поменялось время и статус рейса:\n{new_flights[x]}')
+            elif diff == 'rt':
+                await send_all(f'Поменялось время рейса:\n{new_flights[x]}')
 
 
 async def main():
