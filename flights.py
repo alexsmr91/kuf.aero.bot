@@ -45,13 +45,13 @@ class Flights:
         return res
 
     def get_aw_date(self) -> datetime:
-        st = f'{self.aw_date} {self.aw_time}'
-        frm = '%d.%m.%Y %H:%M'
+        st = f'{self.aw_date} {self.aw_time}+0400'
+        frm = '%d.%m.%Y %H:%M%z'
         return datetime.strptime(st, frm).astimezone(tz)
 
     def get_rl_date(self) -> datetime:
-        st = f'{self.rl_date} {self.rl_time}'
-        frm = '%d.%m.%Y %H:%M'
+        st = f'{self.rl_date} {self.rl_time}+0400'
+        frm = '%d.%m.%Y %H:%M%z'
         return datetime.strptime(st, frm).astimezone(tz)
 
 
