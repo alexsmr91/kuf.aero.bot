@@ -76,7 +76,10 @@ async def cmd_start(message: types.Message):
     exi = db.user_exists(message.from_user['id'])
     if not exi:
         db.add_user(message.from_user['id'])
-    await message.answer("/departure  -  Вылеты\n\nor\n\n/arrival  -  Прилёты", reply_markup=keyboard)
+    try:
+        await message.answer("/departure  -  Вылеты\n\nor\n\n/arrival  -  Прилёты", reply_markup=keyboard)
+    except:
+        pass
 
 
 @dp.message_handler(commands="departure")
@@ -85,7 +88,10 @@ async def cmd_dep(message: types.Message):
     answer = ''
     for x in dep_old:
         answer = f'{answer}{dep_old[x]}\n'
-    await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    try:
+        await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    except:
+        pass
 
 
 @dp.message_handler(commands="arrival")
@@ -94,20 +100,29 @@ async def cmd_arr(message: types.Message):
     answer = ''
     for x in arr_old:
         answer = f'{answer}{arr_old[x]}\n'
-    await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    try:
+        await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    except:
+        pass
 
 @dp.message_handler(commands="users")
 async def cmd_users(message: types.Message):
     if message.from_user['id'] == 140535724:
         answer = '\n'.join(map(str, db.get_user_list()))
-        await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+        try:
+            await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+        except:
+            pass
 
 
 @dp.message_handler()
 async def send_all(text: str):
     users = db.get_user_list()
     for user in users:
-        await bot.send_message(int(user), text, parse_mode=types.ParseMode.HTML)
+        try:
+            await bot.send_message(int(user), text, parse_mode=types.ParseMode.HTML)
+        except:
+            pass
         await asyncio.sleep(0.1)
 
 
