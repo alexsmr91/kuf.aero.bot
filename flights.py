@@ -3,12 +3,12 @@
 ['05:20', '07.03.2022', 'S7 Airlines', 'Москва', 'DME', 'Вылетел',
 '05:28', '07.03.2022', ['LY-8930', 'AT-9014', 'B2-180', 'KC-1438', 'A3-3540']],
 """
-
+from datetime import datetime
 
 class Flights:
 
     def __init__(self, *args, **kwargs):
-        self.aw_time, self.aw_date, self.airlines, self.dest_city, self.dest_airport, self.status, self.rl_time, self.rl_date, self.combi_flights = args
+        self.aw_time, self.aw_date, self.airlines, self.dest_city, self.dest_airport, self.status, self.rl_time, self.rl_date, self.combi_flights, self.arr_flag = args
 
     def __eq__(self, other):
         return self.aw_time == other.aw_time and self.aw_date == other.aw_date and self.airlines == other.airlines and self.dest_city == other.dest_city and self.dest_airport == other.dest_airport and self.status == other.status and self.rl_time == other.rl_time and self.rl_date == other.rl_date and self.combi_flights == other.combi_flights
@@ -41,3 +41,15 @@ class Flights:
         else:
             res = f'{self.rl_time}\n{self.dest_city}\n{self.status}\n'
         return res
+
+    def get_aw_date(self) -> datetime:
+        st = f'{self.aw_date} {self.aw_time}'
+        frm = '%d.%m.%Y %H:%M'
+        return datetime.strptime(st, frm)
+
+    def get_rl_date(self) -> datetime:
+        st = f'{self.rl_date} {self.rl_time}'
+        frm = '%d.%m.%Y %H:%M'
+        return datetime.strptime(st, frm)
+
+

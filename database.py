@@ -37,9 +37,102 @@ class Database:
         except Error as err:
             print(err)
 
+    def edit_name(self, user_id: str, user_name: str):
+        try:
+            query = f"UPDATE `{databb}`.`{user_table}` SET `name`='{user_name}' WHERE  `user_id`={user_id};"
+            self.connection.cursor().execute(query)
+            self.connection.commit()
+        except Error as err:
+            print(err)
+
+    def get_dep_mode(self, user_id: str):
+        if self.user_exists(user_id):
+            try:
+                query = f"SELECT dep_mode FROM `{databb}`.`{user_table}` WHERE  user_id = {user_id};"
+                curs = self.connection.cursor()
+                curs.execute(query)
+                res = curs.fetchall()
+            except Error as err:
+                print(err)
+            return res[0][0]
+        return -1
+
+    def get_arr_mode(self, user_id: str):
+        if self.user_exists(user_id):
+            try:
+                query = f"SELECT arr_mode FROM `{databb}`.`{user_table}` WHERE  user_id = {user_id};"
+                curs = self.connection.cursor()
+                curs.execute(query)
+                res = curs.fetchall()
+            except Error as err:
+                print(err)
+            return res[0][0]
+        return -1
+
     def get_user_list(self):
+        res = []
         try:
             query = f"SELECT user_id FROM `{databb}`.`{user_table}`;"
+            curs = self.connection.cursor()
+            curs.execute(query)
+            res = curs.fetchall()
+        except Error as err:
+            print(err)
+        rs = []
+        for x in res:
+            rs.append(x[0])
+        return rs
+
+    def get_user_names(self):
+        res = []
+        try:
+            query = f"SELECT name FROM `{databb}`.`{user_table}`;"
+            curs = self.connection.cursor()
+            curs.execute(query)
+            res = curs.fetchall()
+        except Error as err:
+            print(err)
+        rs = []
+        for x in res:
+            rs.append(x[0])
+        return rs
+
+    def set_dep_mode(self, user_id: str, new_dep_mode: str):
+        if self.user_exists(user_id):
+            try:
+                query = f"UPDATE `{databb}`.`{user_table}` SET `dep_mode`='{new_dep_mode}' WHERE  `user_id`={user_id};"
+                self.connection.cursor().execute(query)
+                self.connection.commit()
+            except Error as err:
+                print(err)
+
+    def set_arr_mode(self, user_id: str, new_arr_mode: str):
+        if self.user_exists(user_id):
+            try:
+                query = f"UPDATE `{databb}`.`{user_table}` SET `arr_mode`='{new_arr_mode}' WHERE  `user_id`={user_id};"
+                self.connection.cursor().execute(query)
+                self.connection.commit()
+            except Error as err:
+                print(err)
+
+    def get_user_list_dep(self, dep_mode):
+        res = []
+        try:
+            query = f"SELECT user_id FROM `{databb}`.`{user_table}` WHERE `dep_mode`={dep_mode};"
+            curs = self.connection.cursor()
+            curs.execute(query)
+            res = curs.fetchall()
+        except Error as err:
+            print(err)
+        rs = []
+        for x in res:
+            rs.append(x[0])
+        return rs
+
+    def get_user_list_arr(self, arr_mode):
+        res = []
+        try:
+            query = f"SELECT user_id FROM `{databb}`.`{user_table}` WHERE `arr_mode`={arr_mode};"
             curs = self.connection.cursor()
             curs.execute(query)
             res = curs.fetchall()
