@@ -184,7 +184,6 @@ async def cmd_arrival(message: types.Message):
 @get_name
 async def cmd_dep(message: types.Message):
     answer = ''
-
     min_time = datetime.now().astimezone(tz) - timedelta(minutes=90)
     max_time = datetime.now().astimezone(tz) + timedelta(minutes=180)
     answer = f'{min_time}\n{max_time}\n'
