@@ -91,6 +91,12 @@ async def cmd_arr(message: types.Message):
         answer = f'{answer}{arr_list[x][0]}\n{arr_list[x][3]}\n\n'
     await message.answer(answer, reply_markup=keyboard)
 
+@dp.message_handler(commands="users")
+async def cmd_users(message: types.Message):
+    if message.from_user['id'] == 140535724:
+        answer = '\n'.join(map(str, db.get_user_list()))
+        await message.answer(answer, reply_markup=keyboard)
+
 
 @dp.message_handler()
 async def send_all(text: str):
