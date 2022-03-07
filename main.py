@@ -6,6 +6,7 @@ import bs4
 import asyncio
 import os
 from database import Database
+from flights import Flights
 
 tg_api_key = os.getenv('API_KEY')
 if not tg_api_key:
@@ -14,7 +15,7 @@ bot = Bot(token=tg_api_key)
 dp = Dispatcher(bot)
 url_kuf_dep = "https://kuf.aero/board/?ready=yes"
 url_kuf_arr = "https://kuf.aero/board/?type=arr&ready=yes"
-plane_status = {'вылетел', 'регистрация закончена', 'регистрация', 'задержан', 'отменен', 'прибыл', 'ожидается', 'посадка закончена'}
+plane_status = {'вылетел', 'регистрация закончена', 'регистрация', 'задержан', 'отменен', 'прибыл', 'ожидается', 'посадка закончена', 'посадка'}
 db = Database()
 
 
@@ -41,9 +42,9 @@ def kuf_get_data(url):
     return list1
 
 
-def kuf_pars(url):
+def kuf_pars(url, arr_flag):
     list1 = kuf_get_data(url)
-    list2 = {}
+    res_dict = {}
     combi_set = set()
     for roww in list1:
         list_iin = []
@@ -60,10 +61,14 @@ def kuf_pars(url):
         combi_list = combi.replace('Совмещен c ', '').split(', ')
         combi_set.update(combi_list)
         list_iin.append(combi_list)
+        if arr_flag:
+            list_iin[4] = f'{list_iin[4]} - Самара'
+        else:
+            list_iin[4] = f'Самара - {list_iin[4]}'
         flight = list_iin.pop(2)
         if flight not in combi_set:
-            list2.setdefault(flight, list_iin)
-    return list2
+            res_dict.setdefault(flight, Flights(*list_iin))
+    return res_dict
 
 
 @dp.message_handler(commands="start")
@@ -78,58 +83,59 @@ async def cmd_start(message: types.Message):
 async def cmd_dep(message: types.Message):
     #answer = f'{dep_list[0][1]}\n\n'
     answer = ''
-    for x in dep_list:
-        answer = f'{answer}{dep_list[x][0]}\n{dep_list[x][3]}\n\n'
-    await message.answer(answer, reply_markup=keyboard)
+    for x in dep_old:
+        answer = f'{answer}{dep_old[x]}\n'
+    await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
 
 
 @dp.message_handler(commands="arrival")
 async def cmd_arr(message: types.Message):
     #answer = f'{arr_list[0][1]}\n\n'
     answer = ''
-    for x in arr_list:
-        answer = f'{answer}{arr_list[x][0]}\n{arr_list[x][3]}\n\n'
-    await message.answer(answer, reply_markup=keyboard)
+    for x in arr_old:
+        answer = f'{answer}{arr_old[x]}\n'
+    await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
 
 @dp.message_handler(commands="users")
 async def cmd_users(message: types.Message):
     if message.from_user['id'] == 140535724:
         answer = '\n'.join(map(str, db.get_user_list()))
-        await message.answer(answer, reply_markup=keyboard)
+        await message.answer(answer, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
 
 
 @dp.message_handler()
 async def send_all(text: str):
     users = db.get_user_list()
     for user in users:
-        await bot.send_message(int(user), text)
+        await bot.send_message(int(user), text, parse_mode=types.ParseMode.HTML)
         await asyncio.sleep(0.1)
 
 
-async def eq_flight(dict1, dict2):
-    for x in dict2:
-        dict1.setdefault(x, None)
-        if dict1[x] is not None:
-            if dict1[x] != dict2[x]:
-                if dict1[x][5] != dict2[x][5]:
-                    await send_all(f'Поменялся статус рейса:\n{dict2[x][0]}\n{dict2[x][3]}\n{dict2[x][5]}')
-                if dict1[x][6] != dict2[x][6]:
-                    await send_all(f'Поменялось время рейса:\n{dict2[x][0]}\n{dict2[x][3]}\n{dict2[x][5]}')
+async def eq_flight(old_flights, new_flights):
+    for x in new_flights:
+        old_flights.setdefault(x, None)
+        if old_flights[x] is not None:
+            diff = old_flights[x].difference(new_flights[x])
+            if diff == 's':
+                await send_all(f'Поменялся статус рейса:\n{new_flights[x]}')
+            elif diff == 's+rt':
+                await send_all(f'Поменялось время и статус рейса:\n{new_flights[x]}')
 
 
 async def main():
-    global dep_list
-    global arr_list
-    dep_list = kuf_pars(url_kuf_dep)
-    arr_list = kuf_pars(url_kuf_arr)
+    global dep_old
+    global arr_old
+    dep_old = kuf_pars(url_kuf_dep, False)
+    arr_old = kuf_pars(url_kuf_arr, True)
+    await asyncio.sleep(20)
     while True:
-        dep_list1 = kuf_pars(url_kuf_dep)
-        arr_list1 = kuf_pars(url_kuf_arr)
-        await eq_flight(dep_list, dep_list1)
-        dep_list = dep_list1
-        await eq_flight(arr_list, arr_list1)
-        arr_list = arr_list1
-        await asyncio.sleep(5)
+        dep_new = kuf_pars(url_kuf_dep, False)
+        arr_new = kuf_pars(url_kuf_arr, True)
+        await eq_flight(dep_old, dep_new)
+        dep_old = dep_new
+        await eq_flight(arr_old, arr_new)
+        arr_old = arr_new
+        await asyncio.sleep(20)
 
 
 if __name__ == "__main__":
