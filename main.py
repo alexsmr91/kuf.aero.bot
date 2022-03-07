@@ -206,6 +206,7 @@ async def cmd_arr(message: types.Message):
     answer = f'{min_time}\n{max_time}\n'
     for x in arr_old:
         fl_time = arr_old[x].get_rl_date()
+        answer = f'{answer}\nFL{fl_time}\n'
         if min_time < fl_time < max_time:
             answer = f'{answer}{arr_old[x]}\n'
     try:
