@@ -31,8 +31,8 @@ class Flights:
             res = f'{res}rt+'
         if self.rl_date != other.rl_date:
             res = f'{res}rd+'
-        if self.combi_flights != other.combi_flights:
-            res = f'{res}cf+'
+        #if self.combi_flights != other.combi_flights:
+            #res = f'{res}cf+'
         return res.strip('+')
 
     def __repr__(self):
@@ -41,11 +41,3 @@ class Flights:
         else:
             res = f'{self.rl_time}\n{self.dest_city}\n{self.status}\n'
         return res
-
-
-
-if __name__ == '__main__':
-
-    fl = Flights('05:20', '07.03.2022', 'S7 Airlines', 'Москва', 'DME', 'Вылетел', '05:28', '07.03.2022', ['LY-8930', 'AT-9014', 'B2-180', 'KC-1438', 'A3-3540'])
-    fl2 = Flights('05:20', '07.03.2022', 'S7 Airlines', 'Москва', 'DME', 'Вылете', '05:25', '07.03.2022', ['LY-8930', 'AT-9014', 'B2-180', 'KC-1438', 'A3-3540'])
-    print(fl.difference(fl2))
