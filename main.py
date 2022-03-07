@@ -187,6 +187,7 @@ async def cmd_dep(message: types.Message):
 
     min_time = datetime.now().astimezone(tz) - timedelta(minutes=90)
     max_time = datetime.now().astimezone(tz) + timedelta(minutes=180)
+    answer = f'{min_time}\n{max_time}\n'
     for x in dep_old:
         fl_time = dep_old[x].get_rl_date()
         if min_time < fl_time < max_time:
@@ -203,6 +204,7 @@ async def cmd_arr(message: types.Message):
     answer = ''
     min_time = datetime.now().astimezone(tz) - timedelta(minutes=90)
     max_time = datetime.now().astimezone(tz) + timedelta(minutes=180)
+    answer = f'{min_time}\n{max_time}\n'
     for x in arr_old:
         fl_time = arr_old[x].get_rl_date()
         if min_time < fl_time < max_time:
