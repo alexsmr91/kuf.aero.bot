@@ -108,7 +108,11 @@ async def cmd_start(message: types.Message):
                              "/arrival       -  Прилёты полный список\n\n" +
                              "/dep           -  Вылеты короткий список\n\n" +
                              "/arr             -  Прилёты короткий список\n\n" +
-                             "/info           -  Инфо", reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+                             "/max          -  Все уведомления\n\n" +
+                             "/min           -  Только важные\n\n" +
+                             "/stop          -  Без уведомлений\n\n" +
+                             "/depmode   -  Режим ув. о вылетах\n\n" +
+                             "/arrmode    -  Режим ув. о прилётах", reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
     except:
         pass
 
@@ -234,6 +238,41 @@ async def cmd_time(message: types.Message):
         except:
             pass
 
+@dp.message_handler(commands="stop")
+@get_name
+async def cmd_stop(message: types.Message):
+    user_id = message.from_user['id']
+    db.set_arr_mode(user_id, 0)
+    db.set_dep_mode(user_id, 0)
+    try:
+        await message.answer(f'Уведомления выключены', reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    except:
+        pass
+
+
+@dp.message_handler(commands="min")
+@get_name
+async def cmd_min(message: types.Message):
+    user_id = message.from_user['id']
+    db.set_arr_mode(user_id, 2)
+    db.set_dep_mode(user_id, 2)
+    try:
+        await message.answer(f'Минимальные уведомления', reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    except:
+        pass
+
+
+@dp.message_handler(commands="max")
+@get_name
+async def cmd_min(message: types.Message):
+    user_id = message.from_user['id']
+    db.set_arr_mode(user_id, 1)
+    db.set_dep_mode(user_id, 1)
+    try:
+        await message.answer(f'Все уведомления', reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    except:
+        pass
+
 
 @dp.message_handler()
 async def recieve_any_text(message: types.Message):
@@ -275,6 +314,7 @@ async def eq_flight(old_flights, new_flights):
                 #pprint.pprint(old_flights[x].status.lower())
                 #pprint.pprint(status)
                 #print(diff)
+                #print(len(users))
                 #pprint.pprint(users)
             if diff == 's':
                 await send_to_user_list(f'Поменялся статус рейса:\n{new_flights[x]}', users)
@@ -303,7 +343,7 @@ async def main():
 if __name__ == "__main__":
     global keyboard
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    buttons = ["/info", "/departure", "/arrival", "/dep", "/arr", "/depmode", "/arrmode"]
+    buttons = ["/info", "/departure", "/arrival", "/dep", "/arr", "/depmode", "/arrmode", "/min", "/max", "/stop"]
     keyboard.add(*buttons)
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(main())
