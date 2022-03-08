@@ -34,9 +34,9 @@ class Flights:
 
     def __repr__(self):
         if self.rl_time != self.aw_time:
-            res = f'{self.flight}\n<s>{self.aw_time}</s>\n{self.rl_time}\n{self.dest_city} ({self.dest_airport})\n{self.status}\n'
+            res = f'{self.flight}  ({self.airlines})\n<s>{self.aw_time}</s>\n{self.rl_time}\n{self.dest_city}  ({self.dest_airport})\n{self.status}\n'
         else:
-            res = f'{self.flight}\n{self.rl_time}\n{self.dest_city} ({self.dest_airport})\n{self.status}\n'
+            res = f'{self.flight}  ({self.airlines})\n{self.rl_time}\n{self.dest_city}  ({self.dest_airport})\n{self.status}\n'
         return res
 
     def get_aw_date(self) -> datetime:
