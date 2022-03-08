@@ -53,5 +53,3 @@ class Flights:
         st = f'{self.rl_date} {self.rl_time}+0400'
         frm = '%d.%m.%Y %H:%M%z'
         return datetime.strptime(st, frm).astimezone(tz)
-
-

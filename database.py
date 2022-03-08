@@ -39,7 +39,7 @@ class Database:
 
     def edit_name(self, user_id: str, user_name: str):
         try:
-            query = f"UPDATE `{databb}`.`{user_table}` SET `name`='{user_name}' WHERE  `user_id`={user_id};"
+            query = f"UPDATE `{databb}`.`{user_table}` SET `user_name`='{user_name}' WHERE  `user_id`={user_id};"
             self.connection.cursor().execute(query)
             self.connection.commit()
         except Error as err:
@@ -86,7 +86,7 @@ class Database:
     def get_user_names(self):
         res = []
         try:
-            query = f"SELECT name FROM `{databb}`.`{user_table}`;"
+            query = f"SELECT user_name FROM `{databb}`.`{user_table}`;"
             curs = self.connection.cursor()
             curs.execute(query)
             res = curs.fetchall()
