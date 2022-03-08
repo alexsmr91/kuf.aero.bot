@@ -1,8 +1,3 @@
-"""
-'S7-1080':
-['05:20', '07.03.2022', 'S7 Airlines', 'Москва', 'DME', 'Вылетел',
-'05:28', '07.03.2022', ['LY-8930', 'AT-9014', 'B2-180', 'KC-1438', 'A3-3540']],
-"""
 from datetime import datetime
 import pytz
 tz = pytz.timezone('Europe/Samara')
@@ -10,10 +5,10 @@ tz = pytz.timezone('Europe/Samara')
 class Flights:
 
     def __init__(self, *args, **kwargs):
-        self.aw_time, self.aw_date, self.airlines, self.dest_city, self.dest_airport, self.status, self.rl_time, self.rl_date, self.combi_flights, self.arr_flag = args
+        self.aw_time, self.aw_date, self.airlines, self.dest_city, self.dest_airport, self.status, self.rl_time, self.rl_date, self.combi_flights, self.arr_flag, self.flight = args
 
     def __eq__(self, other):
-        return self.aw_time == other.aw_time and self.aw_date == other.aw_date and self.airlines == other.airlines and self.dest_city == other.dest_city and self.dest_airport == other.dest_airport and self.status == other.status and self.rl_time == other.rl_time and self.rl_date == other.rl_date and self.combi_flights == other.combi_flights
+        return self.aw_time == other.aw_time and self.aw_date == other.aw_date and self.airlines == other.airlines and self.dest_city == other.dest_city and self.dest_airport == other.dest_airport and self.status == other.status and self.rl_time == other.rl_time and self.rl_date == other.rl_date and self.combi_flights == other.combi_flights and self.arr_flag == other.arr_flag and self.flight == other.flight
 
     def difference(self, other):
         res = ''
@@ -39,9 +34,9 @@ class Flights:
 
     def __repr__(self):
         if self.rl_time != self.aw_time:
-            res = f'<s>{self.aw_time}</s>\n{self.rl_time}\n{self.dest_city}\n{self.status}\n'
+            res = f'{self.flight}\n<s>{self.aw_time}</s>\n{self.rl_time}\n{self.dest_city} ({self.dest_airport})\n{self.status}\n'
         else:
-            res = f'{self.rl_time}\n{self.dest_city}\n{self.status}\n'
+            res = f'{self.flight}\n{self.rl_time}\n{self.dest_city} ({self.dest_airport})\n{self.status}\n'
         return res
 
     def get_aw_date(self) -> datetime:

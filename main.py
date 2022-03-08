@@ -90,6 +90,7 @@ def kuf_pars(url, arr_flag):
         else:
             list_iin[4] = f'Самара - {list_iin[4]}'
         list_iin.append(arr_flag)
+        list_iin.append(flight)
         flight = list_iin.pop(2)
         if flight not in combi_set:
             res_dict.setdefault(flight, Flights(*list_iin))
@@ -262,7 +263,7 @@ async def eq_flight(old_flights, new_flights):
             diff = old_flights[x].difference(new_flights[x])
             if diff:
                 status = new_flights[x].status.lower()
-                ii = 2 if status in plane_status_minimal else 1
+                ii = 3 if status in plane_status_minimal else 2
                 users = []
                 if new_flights[x].arr_flag:
                     for i in range(1, ii):
@@ -270,6 +271,7 @@ async def eq_flight(old_flights, new_flights):
                 else:
                     for i in range(1, ii):
                         users = users + db.get_user_list_dep(i)
+                #print(x)
                 #pprint.pprint(old_flights[x].status.lower())
                 #pprint.pprint(status)
                 #print(diff)
