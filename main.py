@@ -22,8 +22,8 @@ dp = Dispatcher(bot)
 url_kuf_dep = "https://kuf.aero/board/?ready=yes"
 url_kuf_arr = "https://kuf.aero/board/?type=arr&ready=yes"
 plane_status = {'вылетел', 'регистрация закончена', 'регистрация', 'задержан', 'отменен', 'прибыл', 'ожидается', 'посадка закончена', 'посадка'}
-plane_status_minimal = {'задержан', 'отменен', 'прибыл'}
-plane_status_other = plane_status.difference(plane_status_minimal)
+plane_status_minimal = {'задержан', 'отменен', 'прибыл', 'вылетел'}
+#plane_status_other = plane_status.difference(plane_status_minimal)
 db = Database()
 
 
@@ -123,7 +123,7 @@ async def cmd_depmode(message: types.Message):
 
     elif dep_mode == 1:
         dep_mode += 1
-        answer = f'Включен минимальный режим уведомлений о вылетах (отменен, задержан)'
+        answer = f'Включен минимальный режим уведомлений о вылетах (отменен, задержан, вылетел)'
     else:
         dep_mode = 0
         answer = f'Уведомления о вылетах выключены'
@@ -145,7 +145,7 @@ async def cmd_arrmode(message: types.Message):
 
     elif arr_mode == 1:
         arr_mode += 1
-        answer = f'Включен минимальный режим уведомлений о прилётах (прибыл, отменен)'
+        answer = f'Включен минимальный режим уведомлений о прилётах (отменен, задержан, прибыл)'
     else:
         arr_mode = 0
         answer = f'Уведомления о прилётах выключены'
@@ -260,15 +260,20 @@ async def eq_flight(old_flights, new_flights):
         old_flights.setdefault(x, None)
         if old_flights[x] is not None:
             diff = old_flights[x].difference(new_flights[x])
-            status = new_flights[x].status.lower()
-            ii = 2 if status in plane_status_minimal else 1
-            users = []
-            if new_flights[x].arr_flag:
-                for i in range(1, ii):
-                    users = users + db.get_user_list_arr(i)
-            else:
-                for i in range(1, ii):
-                    users = users + db.get_user_list_dep(i)
+            if diff:
+                status = new_flights[x].status.lower()
+                ii = 2 if status in plane_status_minimal else 1
+                users = []
+                if new_flights[x].arr_flag:
+                    for i in range(1, ii):
+                        users = users + db.get_user_list_arr(i)
+                else:
+                    for i in range(1, ii):
+                        users = users + db.get_user_list_dep(i)
+                #pprint.pprint(old_flights[x].status.lower())
+                #pprint.pprint(status)
+                #print(diff)
+                #pprint.pprint(users)
             if diff == 's':
                 await send_to_user_list(f'Поменялся статус рейса:\n{new_flights[x]}', users)
             elif diff == 's+rt':
