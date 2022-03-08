@@ -90,8 +90,8 @@ def kuf_pars(url, arr_flag):
         else:
             list_iin[4] = f'Самара - {list_iin[4]}'
         list_iin.append(arr_flag)
-        list_iin.append(flight)
         flight = list_iin.pop(2)
+        list_iin.append(flight)
         if flight not in combi_set:
             res_dict.setdefault(flight, Flights(*list_iin))
     return res_dict
