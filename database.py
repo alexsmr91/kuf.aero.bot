@@ -1,83 +1,114 @@
-import os
 from mysql.connector import connect, Error
-
-my_sql_url = os.getenv('MY_SQL').split('#')
-if not my_sql_url:
-    exit("Error: no sql url provided")
-userr, paass, hoost, poort, databb, user_table = my_sql_url
 
 
 class Database:
 
-    def __init__(self):
+    def __init__(self, host="", user="", password="", port=""):
         try:
-            self.connection = connect(host=hoost,
-                                      user=userr,
-                                      password=paass,
-                                      port=poort,
-                                      )
+            self._conn = connect(host=host,
+                                 user=user,
+                                 password=password,
+                                 port=port,
+                                 )
+            self._cursor = self._conn.cursor()
         except Error as err:
             print(err)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    @property
+    def connection(self):
+        return self._conn
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    def commit(self):
+        self.connection.commit()
+
+    def close(self, commit=True):
+        if commit:
+            self.commit()
+        self.connection.close()
+
+    def execute(self, sql, params=None):
+        self.cursor.execute(sql, params or ())
+
+    def fetchall(self):
+        return self.cursor.fetchall()
+
+    def fetchone(self):
+        return self.cursor.fetchone()
+
+    def query(self, sql, params=None):
+        self.cursor.execute(sql, params or ())
+        return self.fetchall()
+
+
+class UsersDataBase:
+
+    def __init__(self, url):
+        sql_url = url.split('#')
+        self.user, self.password, self.host, self.port, self.data_base, self.user_table = sql_url
+
     def user_exists(self, user_id):
-        try:
-            query = f"SELECT * FROM `{databb}`.`{user_table}` WHERE user_id = {user_id};"
-            curs = self.connection.cursor()
-            curs.execute(query)
-            res = curs.fetchone()
-        except Error as err:
-            print(err)
+        res = None
+        with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+            try:
+                res = db.query(f"SELECT * FROM `{self.data_base}`.`{self.user_table}` WHERE user_id = {user_id};")
+            except Error as err:
+                print(err)
         return bool(res)
 
     def add_user(self, user_id: str):
-        try:
-            query = f"INSERT INTO `{databb}`.`{user_table}` (`user_id`) VALUES ('{user_id}');"
-            self.connection.cursor().execute(query)
-            self.connection.commit()
-        except Error as err:
-            print(err)
-
-    def edit_name(self, user_id: str, user_name: str):
-        try:
-            query = f"UPDATE `{databb}`.`{user_table}` SET `user_name`='{user_name}' WHERE  `user_id`={user_id};"
-            self.connection.cursor().execute(query)
-            self.connection.commit()
-        except Error as err:
-            print(err)
-
-    def get_dep_mode(self, user_id: str):
-        if self.user_exists(user_id):
+        with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
             try:
-                query = f"SELECT dep_mode FROM `{databb}`.`{user_table}` WHERE  user_id = {user_id};"
-                curs = self.connection.cursor()
-                curs.execute(query)
-                res = curs.fetchall()
+                db.query(f"INSERT INTO `{self.data_base}`.`{self.user_table}` (`user_id`) VALUES ('{user_id}');")
             except Error as err:
                 print(err)
+
+    def edit_name(self, user_id: str, user_name: str):
+        with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+            try:
+                db.query(f"UPDATE `{self.data_base}`.`{self.user_table}` SET `user_name`='{user_name}' WHERE  `user_id`={user_id};")
+            except Error as err:
+                print(err)
+
+    def get_dep_mode(self, user_id: str):
+        res = [[]]
+        if self.user_exists(user_id):
+            with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+                try:
+                    res = db.query(f"SELECT dep_mode FROM `{self.data_base}`.`{self.user_table}` WHERE  user_id = {user_id};")
+                except Error as err:
+                    print(err)
             return res[0][0]
         return -1
 
     def get_arr_mode(self, user_id: str):
+        res = [[]]
         if self.user_exists(user_id):
-            try:
-                query = f"SELECT arr_mode FROM `{databb}`.`{user_table}` WHERE  user_id = {user_id};"
-                curs = self.connection.cursor()
-                curs.execute(query)
-                res = curs.fetchall()
-            except Error as err:
-                print(err)
+            with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+                try:
+                    res = db.query(f"SELECT arr_mode FROM `{self.data_base}`.`{self.user_table}` WHERE  user_id = {user_id};")
+                except Error as err:
+                    print(err)
             return res[0][0]
         return -1
 
     def get_user_list(self):
         res = []
-        try:
-            query = f"SELECT user_id FROM `{databb}`.`{user_table}`;"
-            curs = self.connection.cursor()
-            curs.execute(query)
-            res = curs.fetchall()
-        except Error as err:
-            print(err)
+        with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+            try:
+                res = db.query(f"SELECT user_id FROM `{self.data_base}`.`{self.user_table}`;")
+
+            except Error as err:
+                print(err)
         rs = []
         for x in res:
             rs.append(x[0])
@@ -85,13 +116,11 @@ class Database:
 
     def get_user_names(self):
         res = []
-        try:
-            query = f"SELECT user_name FROM `{databb}`.`{user_table}`;"
-            curs = self.connection.cursor()
-            curs.execute(query)
-            res = curs.fetchall()
-        except Error as err:
-            print(err)
+        with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+            try:
+                res = db.query(f"SELECT user_name FROM `{self.data_base}`.`{self.user_table}`;")
+            except Error as err:
+                print(err)
         rs = []
         for x in res:
             rs.append(x[0])
@@ -99,31 +128,27 @@ class Database:
 
     def set_dep_mode(self, user_id: str, new_dep_mode: str):
         if self.user_exists(user_id):
-            try:
-                query = f"UPDATE `{databb}`.`{user_table}` SET `dep_mode`='{new_dep_mode}' WHERE  `user_id`={user_id};"
-                self.connection.cursor().execute(query)
-                self.connection.commit()
-            except Error as err:
-                print(err)
+            with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+                try:
+                    db.query(f"UPDATE `{self.data_base}`.`{self.user_table}` SET `dep_mode`='{new_dep_mode}' WHERE  `user_id`={user_id};")
+                except Error as err:
+                    print(err)
 
     def set_arr_mode(self, user_id: str, new_arr_mode: str):
         if self.user_exists(user_id):
-            try:
-                query = f"UPDATE `{databb}`.`{user_table}` SET `arr_mode`='{new_arr_mode}' WHERE  `user_id`={user_id};"
-                self.connection.cursor().execute(query)
-                self.connection.commit()
-            except Error as err:
-                print(err)
+            with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+                try:
+                    db.query(f"UPDATE `{self.data_base}`.`{self.user_table}` SET `arr_mode`='{new_arr_mode}' WHERE  `user_id`={user_id};")
+                except Error as err:
+                    print(err)
 
     def get_user_list_dep(self, dep_mode):
         res = []
-        try:
-            query = f"SELECT user_id FROM `{databb}`.`{user_table}` WHERE `dep_mode`={dep_mode};"
-            curs = self.connection.cursor()
-            curs.execute(query)
-            res = curs.fetchall()
-        except Error as err:
-            print(err)
+        with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+            try:
+                res = db.query(f"SELECT user_id FROM `{self.data_base}`.`{self.user_table}` WHERE `dep_mode`={dep_mode};")
+            except Error as err:
+                print(err)
         rs = []
         for x in res:
             rs.append(x[0])
@@ -131,13 +156,11 @@ class Database:
 
     def get_user_list_arr(self, arr_mode):
         res = []
-        try:
-            query = f"SELECT user_id FROM `{databb}`.`{user_table}` WHERE `arr_mode`={arr_mode};"
-            curs = self.connection.cursor()
-            curs.execute(query)
-            res = curs.fetchall()
-        except Error as err:
-            print(err)
+        with Database(host=self.host, user=self.user, password=self.password, port=self.port) as db:
+            try:
+                res = db.query(f"SELECT user_id FROM `{self.data_base}`.`{self.user_table}` WHERE `arr_mode`={arr_mode};")
+            except Error as err:
+                print(err)
         rs = []
         for x in res:
             rs.append(x[0])
