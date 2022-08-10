@@ -2,6 +2,7 @@ from datetime import datetime
 import pytz
 tz = pytz.timezone('Europe/Samara')
 
+
 class Flights:
 
     def __init__(self, *args, **kwargs):

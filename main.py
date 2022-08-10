@@ -1,4 +1,3 @@
-import pprint
 import requests
 from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher, executor, types
@@ -311,12 +310,6 @@ async def eq_flight(old_flights, new_flights):
                 else:
                     for i in range(1, ii):
                         users = users + db.get_user_list_dep(i)
-                #print(x)
-                #pprint.pprint(old_flights[x].status.lower())
-                #pprint.pprint(status)
-                #print(diff)
-                #print(len(users))
-                #pprint.pprint(users)
             if diff == 's':
                 await send_to_user_list(f'Поменялся статус рейса:\n{new_flights[x]}', users)
             elif diff == 's+rt':
