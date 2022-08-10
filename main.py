@@ -13,20 +13,19 @@ from functools import wraps
 tz = pytz.timezone('Europe/Samara')
 tg_api_key = os.getenv('API_KEY')
 admin_id = int(os.getenv('ADMIN'))
-my_sql_url = os.getenv('MY_SQL')
+
 if not tg_api_key:
     exit("Error: no tg token provided")
 if not admin_id:
     exit("Error: no admin id provided")
-if not my_sql_url:
-    exit("Error: no sql url provided")
+
 bot = Bot(token=tg_api_key)
 dp = Dispatcher(bot)
 url_kuf_dep = "https://kuf.aero/board/?ready=yes"
 url_kuf_arr = "https://kuf.aero/board/?type=arr&ready=yes"
 plane_status = {'вылетел', 'регистрация закончена', 'регистрация', 'задержан', 'отменен', 'прибыл', 'ожидается', 'посадка закончена', 'посадка'}
 plane_status_minimal = {'задержан', 'отменен', 'прибыл', 'вылетел', 'регистрация'}
-db = UsersDataBase(my_sql_url)
+db = UsersDataBase()
 
 
 def get_name(func):
