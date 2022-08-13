@@ -12,6 +12,7 @@ from functools import wraps
 tz = pytz.timezone('Europe/Samara')
 tg_api_key = os.getenv('API_KEY')
 admin_id = int(os.getenv('ADMIN'))
+postgre_uri = os.getenv('URI')
 
 if not tg_api_key:
     exit("Error: no tg token provided")
@@ -24,7 +25,7 @@ url_kuf_dep = "https://kuf.aero/board/?ready=yes"
 url_kuf_arr = "https://kuf.aero/board/?type=arr&ready=yes"
 plane_status = {'вылетел', 'регистрация закончена', 'регистрация', 'задержан', 'отменен', 'прибыл', 'ожидается', 'посадка закончена', 'посадка'}
 plane_status_minimal = {'задержан', 'отменен', 'прибыл', 'вылетел', 'регистрация'}
-db = UsersDataBase()
+db = UsersDataBase(postgre_uri)
 
 
 def get_name(func):
