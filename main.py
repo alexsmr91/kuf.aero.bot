@@ -12,7 +12,7 @@ from functools import wraps
 tz = pytz.timezone('Europe/Samara')
 tg_api_key = os.getenv('API_KEY')
 admin_id = int(os.getenv('ADMIN'))
-postgre_uri = os.getenv('URI')
+postgre_uri = os.getenv('DATABASE_URL')
 
 if not tg_api_key:
     exit("Error: no tg token provided")
