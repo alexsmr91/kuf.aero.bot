@@ -50,9 +50,11 @@ class UsersDataBase:
 
     def __init__(self, user_table='users'):
         self.user_table = user_table
-        """
-        CREATE TABLE users (user_id INTEGER, user_name TEXT, dep_mode INTEGER, arr_mode INTEGER);
-        """
+        with Database() as db:
+            try:
+                res = db.query(f"CREATE TABLE if not exists `{self.user_table}` (user_id INTEGER, user_name TEXT, dep_mode INTEGER, arr_mode INTEGER);")
+            except Error as err:
+                print(err)
 
     def user_exists(self, user_id):
         res = None
