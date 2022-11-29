@@ -1,0 +1,20 @@
+version: '3'
+services:
+  bot:
+    build: .
+    command: python3 main.py
+    depends_on:
+      - postgres
+    volumes:
+      - .:/usr/src/kuf-aero-bot
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://username@postgres/dbname
+  postgres:
+    image: postgres:9.6.2-alpine
+    ports:
+      - "5000:5000"
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_DB: dbname
