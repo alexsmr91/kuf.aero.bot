@@ -22,5 +22,3 @@ services:
       - .:/home/user/postgresqldata
     ports:
       - "5432:5432"
-
-
