@@ -6,7 +6,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - .:/usr/src/kuf-aero-bot
+      - .:/usr/src/kuf_aero_bot
     environment:
       DATABASE_URL: postgres://kufpostuser:kufpasswd@postgres/kufdb
       ADMIN: <admin_tg_id>
@@ -17,9 +17,10 @@ services:
       POSTGRES_DB: "kufdb"
       POSTGRES_USER: "kufpostuser"
       POSTGRES_PASSWORD: "kufpasswd"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
+      PGDATA: "/home/user/postgresqldata/pgdata"
     volumes:
-      - ../2. Init Database:/docker-entrypoint-initdb.d
-      - .:/var/lib/postgresql/data
+      - .:/home/user/postgresqldata
     ports:
       - "5432:5432"
+
+
