@@ -11,6 +11,10 @@ services:
       DATABASE_URL: postgres://kufpostuser:kufpasswd@postgres/kufdb
       ADMIN: <admin_tg_id>
       API_KEY: <tg_api_key>
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "1"
     restart: always
   postgres:
     image: postgres:13.3
@@ -23,5 +27,9 @@ services:
       - .:/home/user/postgresqldata
     ports:
       - "5432:5432"
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "1"
     restart: always
 
